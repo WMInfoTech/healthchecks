@@ -1,0 +1,31 @@
+version: '3.3'
+
+services:
+  healthchecks:
+    build: ../.
+    image: wmit/healthchecks:latest
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: ingress
+    depends_on:
+      - database
+  alert_sender:
+    build: ../.
+    image: wmit/healthchecks:latest
+    command: python manage.py sendalerts
+    healthcheck:
+      disable: true
+    depends_on:
+      - database
+  database:
+    image: mysql:5.7
+    healthcheck:
+      test: mysql -uhealthchecks -psupersecretpassword healthchecks -e'SELECT 1'
+    environment:
+      MYSQL_DATABASE: healthchecks
+      MYSQL_USER: healthchecks
+      MYSQL_PASSWORD: supersecretpassword
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_ONETIME_PASSWORD: "yes"
