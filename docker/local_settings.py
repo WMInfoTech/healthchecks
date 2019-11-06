@@ -13,6 +13,12 @@ if os.path.isfile(db_password):
     with open(db_password, 'r') as password_file:
         db_password = password_file.read()
 
+smtp_password = os.getenv('MAIL_PASSWORD', config['mail']['password'])
+if os.path.isfile(smtp_password):
+    with open(smtp_password, 'r') as password_file:
+        smtp_password = password_file.read()
+
+
 DEBUG = os.getenv('DEBUG', config['site']['debug']).lower() == 'true'
 
 SITE_ROOT = os.getenv('SITE_URL', config['site']['url'])
@@ -35,7 +41,7 @@ DATABASES = {
 EMAIL_HOST = os.getenv('MAIL_HOST', config['mail']['host'])
 EMAIL_PORT = os.getenv('MAIL_PORT', config['mail']['port'])
 EMAIL_HOST_USER = os.getenv('MAIL_USER', config['mail']['user'])
-EMAIL_HOST_PASSWORD = os.getenv('MAIL_PASSWORD', config['mail']['password'])
+EMAIL_HOST_PASSWORD = smtp_password
 EMAIL_USE_TLS = os.getenv('MAIL_TLS', config['mail']['use_tls']).lower() == 'true'
 
 REGISTRATION_OPEN = os.getenv('ENABLE_REGISTRATION', config['site']['enable_registration']).lower() == 'true'
