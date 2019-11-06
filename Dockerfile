@@ -1,4 +1,4 @@
-FROM python:3-alpine
+FROM docker.io/python:3-alpine
 
 LABEL org.label-schema.name="Healthchecks" \
       org.label-schema.description="Basic intallation of Healthchecks" \
