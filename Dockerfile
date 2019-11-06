@@ -1,4 +1,4 @@
-FROM python:3.6-alpine
+FROM python:3-alpine
 
 LABEL org.label-schema.name="Healthchecks" \
       org.label-schema.description="Basic intallation of Healthchecks" \
@@ -7,20 +7,20 @@ LABEL org.label-schema.name="Healthchecks" \
 HEALTHCHECK CMD curl -f http://localhost:8080/ || exit 1
 ENV PYTHONUNBUFFERED=1
 
-ADD . /healthchecks
+ADD requirements.txt /healthchecks/requirements.txt
 
 WORKDIR /healthchecks
 
-RUN apk add --no-cache tzdata \
-    && rm /etc/localtime \
-    && ln -s /usr/share/zoneinfo/US/Eastern /etc/localtime
-
-RUN apk add --no-cache mariadb-libs mariadb-client-libs postgresql-libs curl \
-    && apk add --no-cache --virtual .build-deps gcc python3-dev musl-dev mariadb-dev postgresql-dev\
+RUN apk add --no-cache tzdata gcc g++ mariadb-dev mariadb-connector-c musl-dev libffi libffi-dev mariadb-client openssl postgresql-dev \
+    && ln -s /usr/share/zoneinfo/US/Eastern /etc/localtime \
+    # circumvent a bug in pip 19.0.1
+    && pip install --upgrade pip \
+    && pip install psycopg2-binary \
     && pip install --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir gunicorn==19.7.1 \
-    && apk del .build-deps \
-    && cp docker/local_settings.py hc/. \
+    && apk del gcc mariadb-dev musl-dev libffi-dev postgresql-dev
+
+ADD . /healthchecks
+RUN cp docker/local_settings.py hc/. \
     && python manage.py collectstatic --noinput \
     && python manage.py compress
 
